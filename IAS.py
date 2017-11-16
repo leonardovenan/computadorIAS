@@ -94,8 +94,8 @@ class IR():
         self.dado = dado
         
 class PC():
-    def __init__(self, memoria):
-        self.memoria = memoria
+    def __init__(self, MEM):
+        self.MEM = MEM
         self.endereco = '000000000000'
 
     def getEndereco(self):
@@ -107,13 +107,13 @@ class PC():
     def proximo(self):
         self.endereco = dec_para_ad(ad_para_dec(self.endereco)+1)
 
-class Memoria():
+class MEM():
     def __init__(self):
         self.palavras = []
         self.setPalavras()
 
     def setPalavras(self):
-        with open('memoria.txt', 'r') as palavras:
+        with open('MEM.txt', 'r') as palavras:
             self.palavras = [x[:40] for x in palavras.read().splitlines()]
 
     def leitura(self, endereco):
@@ -124,14 +124,14 @@ class Memoria():
 
 class MAR():
 
-    def __init__(self, pc, memoria, mbr):
-        self.memoria = memoria
+    def __init__(self, pc, MEM, mbr):
+        self.MEM = MEM
         self.pc = pc
         self.mbr = mbr
         self.endereco = pc.getEndereco()
 
     def setMbr(self):
-        mbr.setDado(memoria.leitura(self.endereco))
+        mbr.setDado(MEM.leitura(self.endereco))
 
     def atualizar(self):
         self.endereco = pc.getEndereco()
@@ -188,8 +188,8 @@ class IBR():
         return self.dado
 
 class CPU():
-    def __init__ (self, memoria, pc, mbr, mar, ibr, ir, mq, ac):
-        self.memoria = memoria
+    def __init__ (self, MEM, pc, mbr, mar, ibr, ir, mq, ac):
+        self.MEM = MEM
         self.pc = pc
         self.mbr = mbr
         self.mar = mar
@@ -222,16 +222,16 @@ class CPU():
             self.ac.setDado(self.mq.getDado())
         #Carregar M(X) - Armazenamento M(X) em AC    
         elif atual == '00000001': 
-            self.ac.setDado(self.memoria.leitura(self.mar.getEndereco()))
+            self.ac.setDado(self.MEM.leitura(self.mar.getEndereco()))
         #Carregar MQ,M(X) - Transferencia de conteúdo do local de memória X para MQ    
         elif atual == '00001001': 
-            self.mq.setDado(self.memoria.leitura(self.mar.getEndereco()))
+            self.mq.setDado(self.MEM.leitura(self.mar.getEndereco()))
         #Separar M(X) - Armazenamento de conteúdo de AC no endereço X da memória     
         elif atual == '00100001': 
-            self.memoria.escrita(self.mar.getEndereco(), self.ac.getDado())  
+            self.MEM.escrita(self.mar.getEndereco(), self.ac.getDado())  
         #Carregar - M(X) - Armazenamento de -M(X) em AC    
         elif atual == '00000010': 
-            dado = self.memoria.leitura(self.mar.getEndereco())            
+            dado = self.MEM.leitura(self.mar.getEndereco())            
             if dado.startswith('0'):
                 dado = dado.replace('0','1',1)
             else:
@@ -239,7 +239,7 @@ class CPU():
             self.ac.setDado(dado)
         #Carregar -|M(X)| - Armazenamento -|M(X)| em AC    
         elif atual == '00000100': 
-            dado = self.memoria.leitura(self.mar.getEndereco())            
+            dado = self.MEM.leitura(self.mar.getEndereco())            
             if dado.startswith('0'):
                 dado = dado.replace('0','1',1)
             self.ac.setDado(dado)
@@ -249,12 +249,12 @@ class CPU():
             self.pc.setEndereco(self.mar.getEndereco())
         #JUMP M(X,20:39) - Saltar para a instrução da direita da palavra em M(X)    
         elif atual == '00001110': 
-            palavra = self.memoria.leitura(self.mar.getEndereco())
+            palavra = self.MEM.leitura(self.mar.getEndereco())
             self.ibr.setDado(palavra[20:])
             self.pc.setEndereco(dec_para_ad(int(ad_para_dec(self.mar.getEndereco()) + 1)))
         #Carregar |M(X)| - Armazenamento o valor absoluto de M(X) em AC     
         elif atual == '00000011': 
-            dado = self.memoria.leitura(self.mar.getEndereco())            
+            dado = self.MEM.leitura(self.mar.getEndereco())            
             if dado.startswith('1'):
                 dado = dado.replace('1','0',1)
             self.ac.setDado(dado)
@@ -262,15 +262,15 @@ class CPU():
         elif atual == '0001000': 
             dado_ac = self.ac.getDado()
             if dado_ac.startswith('0'):
-                palavra = self.memoria.leitura(self.mar.getEndereco())
+                palavra = self.MEM.leitura(self.mar.getEndereco())
                 self.ibr.setDado(palavra[20:])
                 self.pc.setEndereco(dec_para_ad(int(ad_para_dec(self.mar.getEndereco()) + 1)))       
         #ADD M(X) - Somar o valor em M(X) com o valor em AC e armazena em AC        
         elif atual == '00000101': 
-            self.ac.adicionar(self.memoria.leitura(self.mar.getEndereco()))
+            self.ac.adicionar(self.MEM.leitura(self.mar.getEndereco()))
         #ADD |M(X)| - Somar o valor absoluto de M(X) com o valor em AC e armazena em AC        
         elif atual == '00000111': 
-            dado = self.memoria.leitura(self.mar.getEndereco())
+            dado = self.MEM.leitura(self.mar.getEndereco())
             if dado.startswith('1'):
                 dado = dado.replace('1','0',1)
             self.ac.adicionar(dado)
@@ -282,22 +282,22 @@ class CPU():
                 self.pc.setEndereco(self.mar.getEndereco())
         #SUB M(X) - Subtrai o valor em M(X) do valor presente em AC e armazena em Ac        
         elif atual == '00000110': 
-            self.ac.subtrair(self.memoria.leitura(self.mar.getEndereco()))        
+            self.ac.subtrair(self.MEM.leitura(self.mar.getEndereco()))        
         #SUB |M(X)| - Subtrai o valor absoluto de M(X) do valor em AC e armazena em AC    
         elif atual == '00001000': 
-            dado = self.memoria.leitura(self.mar.getEndereco())
+            dado = self.MEM.leitura(self.mar.getEndereco())
             if dado.startswith('1'):
                 dado = dado.replace('1','0',1)
             self.ac.subtrair(dado)
         #MUL M(X) - Multiplica o valor em M(X) pelo valor em MQ e armazena em AC e em MQ    
         elif atual == '00001011': 
-            self.mq.multiplicar(self.memoria.leitura(self.mar.getEndereco()))
+            self.mq.multiplicar(self.MEM.leitura(self.mar.getEndereco()))
             self.ac.setDado(self.mq.getDado())
         #DIV M(X) Divide o valor em AC pelo valor de M(X). Armazena o quociente em MQ e o resto em AC    
         elif atual == '00001100': 
             self.mq.setDado(self.ac.getDado())
-            self.mq.quociente(self.memoria.leitura(self.mar.getEndereco()))
-            self.ac.resto(self.memoria.leitura(self.mar.getEndereco()))
+            self.mq.quociente(self.MEM.leitura(self.mar.getEndereco()))
+            self.ac.resto(self.MEM.leitura(self.mar.getEndereco()))
         #LSH (Left Shift) - Desloca os bits do AC para a esquerda. Equivale a multiplicar AC por 2    
         elif atual == '00010100': 
             dado_ac = self.ac.getDado()
@@ -322,27 +322,27 @@ class CPU():
                 self.ac.setDado(novo_dado)
         #STOP M(X,8:19) - Move os 12 bits à direita de AC para o campo endereço da instrução da esquerda da palavra em M(X)        
         elif atual == '00010010': 
-            palavra = self.memoria.leitura(self.mar.getEndereco())
+            palavra = self.MEM.leitura(self.mar.getEndereco())
             novo_end = self.ac.getDado()[:27:-1]
             nova_palavra = palavra[:8] + novo_end + palavra[20:]
-            self.memoria.escrita(self.mar.getEndereco(), nova_palavra)
+            self.MEM.escrita(self.mar.getEndereco(), nova_palavra)
         #STOP M(X, 28:39) - Move os 12 bits à direita de AC para o campo endereço da instrução da direita da palavra em M(X)                
         elif atual == '00010011': 
-            palavra = self.memoria.leitura(self.mar.getEndereco())
+            palavra = self.MEM.leitura(self.mar.getEndereco())
             novo_end = self.ac.getDado()[:27:-1]
             nova_palavra = palavra[:28] + novo_end
-            self.memoria.escrita(self.mar.getEndereco(), nova_palavra)            
+            self.MEM.escrita(self.mar.getEndereco(), nova_palavra)            
         #Condição de parada     
         elif atual == '00000000': 
             self.stop = True
 
 mbr = MBR()
-memoria = Memoria()
-pc = PC(memoria)
-mar = MAR(pc, memoria, mbr)
+MEM = MEM()
+pc = PC(MEM)
+mar = MAR(pc, MEM, mbr)
 ac = AC()
 mq = MQ()
 ibr = IBR()
 ir = IR()
-cpu = CPU(memoria, pc, mbr, mar, ibr, ir, mq, ac)
+cpu = CPU(MEM, pc, mbr, mar, ibr, ir, mq, ac)
 cpu.pararfunc()
