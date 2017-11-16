@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Created on Mon Set 24 15:51:37 2017
 
@@ -6,9 +6,7 @@ Created on Mon Set 24 15:51:37 2017
 """
 
 def sm_para_dec(num):
-    #Recebe palavras de 40 bits na forma sinal-magnitude (1º bit de sinal) e retorna uma string contendo o inteiro correspondente
-    #primeiro verificando se tal numeor eh binario ou nao
-	
+    #primeiro verificando se tal numeor eh binario ou nao	
     num = str(num)    
     for x in num:
         if x != '0' and x != '1':
@@ -32,9 +30,7 @@ def sm_para_dec(num):
             return str(-res)
 
 def ad_para_dec(num):
-    #Recebe um endereço de memoria (12 bits) e retorna um inteiro correspondente ao índice da lista de palavras em Memória
-    #primeiro verificando se tal numeor eh binario ou nao
-    
+   #primeiro verificando se tal numeor eh binario ou nao    
     num = str(num)    
     for x in num:
         if x != '0' and x != '1':
