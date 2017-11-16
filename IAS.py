@@ -5,7 +5,7 @@ Created on Mon Set 24 15:51:37 2017
 @author: Leonardo Venancio
 """
 
-def sm_para_dec(num):
+def sm_para_dec(num): #primeira função
     #primeiro verificando se tal numeor eh binario ou nao	
     num = str(num)    
     for x in num:
@@ -29,7 +29,7 @@ def sm_para_dec(num):
         else:
             return str(-res)
 
-def ad_para_dec(num):
+def ad_para_dec(num): #segunda função
    #primeiro verificando se tal numeor eh binario ou nao    
     num = str(num)    
     for x in num:
@@ -113,7 +113,7 @@ class MEM():
         self.setPalavras()
 
     def setPalavras(self):
-        with open('MEM.txt', 'r') as palavras:
+        with open('memoria.txt', 'r') as palavras:
             self.palavras = [x[:40] for x in palavras.read().splitlines()]
 
     def leitura(self, endereco):
